@@ -1,5 +1,7 @@
 # homogenize
-Analytical formulas for survival in regime switching Orstein-Uhlenbeck processes
+Analytical formulas for survival in regime switching Orstein-Uhlenbeck processes. 
+
+See [article](https://www.linkedin.com/pulse/got-milk-homogenization-survival-probability-peter-cotton-phd/). 
 
 # Hi there
 This package exists for one purpose only: estimation of survival probability for a triply stochastic regime switching process using a fairly advanced technique, asymptotic homogenization. I'm still tinkering
