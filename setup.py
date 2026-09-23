@@ -1,14 +1,13 @@
 import pathlib
-from setuptools import setup, find_packages
+from setuptools import setup
 
 HERE = pathlib.Path(__file__).parent
-
 README = (HERE / "README.md").read_text()
 
 setup(
     name="homogenize",
-    version="0.0.1",
-    description="Survivial probability estimator for Regime Switching Orstein-Uhlenbeck triply stochastic process",
+    version="0.1.0",
+    description="Survival probability for a regime-switching Ornstein-Uhlenbeck hazard: fast-switching expansion to any order",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/microprediction/homogenize",
@@ -18,16 +17,9 @@ setup(
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
     ],
-    packages=['homogenize'],
-    test_suite='pytest',
-    tests_require=['pytest','numpy','requests','pathlib'],
-    include_package_data=True,
-    install_requires=["numpy",'numpy','requests','pathlib'],
-    entry_points={
-        "console_scripts": [
-            "homogenize=homogenize.__main__:main",
-        ]
-     },
-     )
+    packages=["homogenize"],
+    python_requires=">=3.8",
+    install_requires=["numpy"],
+    extras_require={"test": ["pytest"]},
+)

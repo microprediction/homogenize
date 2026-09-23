@@ -1,32 +1,49 @@
 # homogenize
-Analytical formulas for survival in regime switching Orstein-Uhlenbeck processes. 
 
-See [article](https://www.linkedin.com/pulse/got-milk-homogenization-survival-probability-peter-cotton-phd/). 
+Survival probability, equivalently a zero-coupon bond price, when the hazard rate is an
+Ornstein–Uhlenbeck process whose mean level and volatility switch between two regimes:
 
-# Hi there
-This package exists for one purpose only: estimation of survival probability for a triply stochastic regime switching process using a fairly advanced technique, asymptotic homogenization. I'm still tinkering
-with it and there might yet be bugs ... so caveat emptor. The calculation is 
-from the back of my phd thesis 18 years ago so I'm a bit rusty :) The technique is not like
-a series expansion that is more accurate near t=0, rather it is more accurate for larger t. A little
-counterintuitive. It needs to be used with care and I recommend running the simulations to get a sense. 
+    dx = κ(θ_s − x) dt + σ_s dW,    u(t, x, s) = E[ exp(−∫₀ᵗ x_r dr) | x₀ = x, s₀ = s ]
 
-If you are truly interested there is a draft shared on Overleaf: https://www.overleaf.com/read/rqkgmnqfsvvm
-If you discover a bug in the maple code for generating the series expansion or the
-python code it is translated to I will be forever greatful. 
+The package evaluates the fast-switching (homogenization) expansion to any order, including the
+initial layer, for symmetric or unequal switching rates. It also solves the reduced two-state
+linear ODE numerically, and simulates. Derivation and demonstrations:
+[homogenization.microprediction.org](https://homogenization.microprediction.org/regime-switching.html).
 
--Peter
+## Install
 
-# Usage 
+    pip install homogenize
 
-To use the survival probability estimator
+## Usage
 
-    from homogenize import RegimeSwitchingModel
-    params = {'kappa': 2.0, 'thetas': [0.15, 0.02], 'sigmas': [math.sqrt(0.0555), math.sqrt(0.0055)], 'lmbd': 1.7}
-    model = RegimeSwitchingModel(**params)
-    model.u(x=0.12,t=7.2) 
-    
-To check against simulation
+```python
+import math
+from homogenize import RegimeSwitchingModel
 
-    from homogenize import demo
-    demo() 
-    
+model = RegimeSwitchingModel(kappa=2.0, thetas=[0.15, 0.02],
+                             sigmas=[math.sqrt(0.0555), math.sqrt(0.0055)], lmbd=5.0, order=6)
+model.u(t=7.2, x=0.12, s=0)            # expansion through order 6
+model.u(t=7.2, x=0.12, s=0, order=2)   # through order 2
+model.numerical(t=7.2, x=0.12, s=0)    # numerical solution of the two-state ODE
+model.series(t=7.2, x=0.12, s=0)       # contribution of each order
+```
+
+`lmbd` is the rate at which each regime switches to the other. For unequal occupancy pass
+`rates=(rate 0 → 1, rate 1 → 0)` instead.
+
+## How it works
+
+Because κ does not switch, `u(t, x, s) = a_s(t) exp(−B(t) x)` with `B(t) = (1 − e^{−κt})/κ`, and `a`
+solves a two-state linear ODE. With stationary probabilities `(p, q)`, total rate `γ`,
+`s = p a₁ + q a₂` and `r = (a₁ − a₂)/s`:
+
+    r' = D (1 + (q − p) r − p q r²) − γ r,   r(0) = 0,   D = G₁ − G₂,  G_i = −κ θ_i B + σ_i² B²/2
+    log s = ∫₀ᵗ (p G₁ + q G₂ + p q D r)
+
+Expanding `r` in `1/γ` gives terms that are polynomials in `E = 1 − e^{−κt}`, integrated in closed
+form; an initial layer of width `1/γ` is solved to all orders in the span of `τᵏ e^{−jτ}`, `τ = γt`.
+The error after `n` orders falls like `γ^{−(n+1)}`.
+
+## Tests
+
+    pip install -e .[test] && pytest
